@@ -11,7 +11,7 @@ You need to enable and download credentials files using [Google console](https:/
 
 ## Installation
 - `git clone https://github.com/threefoldtech/slides2html`
-- `pip3 install setup.py . e`
+- `pip3 install .` or `python3 setup.py install`
 - in case of any dependency problems make sure to `pip install -r requirements.txt`
 
 ## Usage
