@@ -1,4 +1,4 @@
-# presentation2html
+# slides2html
 
 `slides2html` is a tool to convert Google presentations into html websites using [reveal.js](https://revealjs.com).
 
@@ -6,10 +6,13 @@
 
 The tool converts the slides of a (Google) presentation into images (PNG) using the Google API and generates entry point file with reveal.js templates.
 
+### Get credentials
+You need to enable and download credentials files using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com) or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
 
 ## Installation
-1. `git clone https://github.com/threefoldtech/presentation2html`
-2. `pip3 install setup.py . e`
+- `git clone https://github.com/threefoldtech/slides2html`
+- `pip3 install setup.py . e`
+- in case of any dependency problems make sure to `pip install -r requirements.txt`
 
 ## Usage
 
@@ -18,14 +21,62 @@ The tool converts the slides of a (Google) presentation into images (PNG) using 
 - Get credentials from [Google API Console](https://console.developers.google.com/apis/credentials) and save it on your filesystem (e.g `/tmp/credentials.json`)
 - Convert using `slides2html`
 ```bash
-slides2html --website revealjs --presentationid 147sFqkzjr_caJrh5f4ZpRRdD0SZP32
-aGSBkfDNH31PM --imagesize large --credfile /tmp/credentials.json
+slides2html --website /tmp/revealjs --id 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM  --credfile ~/credentials.json
 ```
-
 - in `/tmp/revealjs` directory there will be entrypoint (customizable using `--indexfile` option) `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM.html` and directory named `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM`
 
 ```bash
 ~> ls /tmp/revealjs
 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM       bower.json       css        Gruntfile.js  js   LICENSE       plugin     revealjs
 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM.html  CONTRIBUTING.md  demo.html  index.html    lib  package.json  README.md  test
+
+~> tree /tmp/revealjs/147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM
+
+/tmp/revealjs/147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM
+├── 00_g4b3e153e09_0_58.png
+├── 01_g4b3e153e09_0_218.png
+├── 02_g4b3e153e09_0_135.png
+├── 03_g4b70871d28_0_0.png
+├── 04_g4c087152a6_32_59.png
+├── 05_g4a13b6e525_0_1316.png
+├── 06_g4a13b6e525_0_1324.png
+├── 07_g4a13b6e525_0_1344.png
+├── 08_g4a13b6e525_0_1331.png
+├── 09_g4b3e153e09_0_125.png
+├── 10_g4b70871d28_0_121.png
+├── 11_g4b70871d28_0_224.png
+├── 12_g4b3e153e09_0_80.png
+├── 13_g4b70871d28_0_425.png
+├── 14_g4c087152a6_32_14.png
+├── 15_g4b3e153e09_0_109.png
+├── 16_g4b3e153e09_0_74.png
+├── 17_g4b3e153e09_0_162.png
+├── 18_g4b3e153e09_0_151.png
+├── 19_g4b3e153e09_0_156.png
+├── 20_g4b3e153e09_0_104.png
+├── 21_g4b3e153e09_0_140.png
+├── 22_g4b3e153e09_0_173.png
+├── 23_g4b3e153e09_0_29.png
+├── 24_g4b3e153e09_0_8.png
+├── 25_g4b3e153e09_0_54.png
+├── 26_g4b3e153e09_0_193.png
+├── 27_g4b3e153e09_0_16.png
+└── 28_g4b3e153e09_0_0.png
+
+
+```
+
+
+## Usage
+```bash
+Usage: slides2html [OPTIONS]
+
+Options:
+  --website TEXT    Reveal.js site directory  [required]
+  --id TEXT         presentation id  [required]
+  --indexfile TEXT  index filename. will default to presentation id if
+                    not provided.
+  --imagesize TEXT  image size (MEDIUM, LARGE)
+  --credfile TEXT   credentials file path
+  --help            Show this message and exit.
 ```

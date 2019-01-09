@@ -1,6 +1,6 @@
 import os
 from jinja2 import Template
-from presentation2html.revealjstemplate import BASIC_TEMPLATE
+from slides2html.revealjstemplate import BASIC_TEMPLATE
 
 
 class Generator:
