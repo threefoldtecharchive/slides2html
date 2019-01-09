@@ -1,5 +1,5 @@
-requests==2.18.4
 httplib2==0.11.3
+requests==2.21.0
 setuptools==39.0.1
 Jinja2==2.10
 google_api_python_client==1.7.7
