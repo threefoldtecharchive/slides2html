@@ -67,7 +67,3 @@ class Tool:
 
         with open(entryfile, "w") as f:
             f.write(html)
-
-
-
-
