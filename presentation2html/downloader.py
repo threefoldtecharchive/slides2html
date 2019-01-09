@@ -62,7 +62,7 @@ class Downloader:
             url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId, thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
             image_id = str(i).zfill(zerofills)
             save_as = "{image_id}_{page_id}.png".format(image_id=image_id, page_id=pageId)
-            print(save_as)
+            # print(save_as)
             links.append((url, save_as))
         return links
 

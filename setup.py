@@ -12,7 +12,7 @@ setup(name='presentation2html',
       long_description='convert google presentations to reveal.js website',
       packages=['presentation2html'],
       scripts=['scripts/slides2html'],
-      url="http://github.com/xmonader/presentation2html",
+      url="https://github.com/threefoldtech/presentation2html",
       license='BSD 3-Clause License',
       classifiers=[
           'Development Status :: 4 - Beta',
