@@ -8,7 +8,7 @@ Converts presentation's slides into images (png) using Google APIs and generate 
 
 
 ## Installation
-- git clone https://github.com/xmonader/presentation2html
+- git clone https://github.com/threefoldtech/presentation2html
 - pip3 install setup.py . e 
 
 ## Usage
