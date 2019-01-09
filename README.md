@@ -1,10 +1,10 @@
 # presentation2html
 
-`slides2html` is a tool to convert Google presentations into html website using [reveal.js](https://revealjs.com)
+`slides2html` is a tool to convert Google presentations into html websites using [reveal.js](https://revealjs.com).
 
 ## How it works
 
-Converts presentation's slides into images (png) using Google APIs and generate entry point file with reveal.js templates.
+The tool converts the slides of a (Google) presentation into images (PNG) using the Google API and generates entry point file with reveal.js templates.
 
 
 ## Installation
@@ -13,7 +13,7 @@ Converts presentation's slides into images (png) using Google APIs and generate 
 
 ## Usage
 
-- Download basic release from https://github.com/hakimel/reveal.js 
+- Download basic release from https://github.com/hakimel/reveal.js
 - Untar it into suitable directory (e.g `/tmp/revealjs`)
 - Get credentials from [Google API Console](https://console.developers.google.com/apis/credentials) and save it on your filesystem (e.g `/tmp/credentials.json`)
 - Convert using `slides2html`
