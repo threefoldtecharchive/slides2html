@@ -14,7 +14,8 @@ Converts presentation's slides into images (png) using Google APIs and generate 
 ## Usage
 
 - Download basic release from https://github.com/hakimel/reveal.js 
-- Untar it into suitable directory (e.g /tmp/revealjs)
+- Untar it into suitable directory (e.g `/tmp/revealjs`)
+- Get credentials from [Google API Console](https://console.developers.google.com/apis/credentials) and save it on your filesystem (e.g `/tmp/credentials.json`)
 - Convert using `slides2html`
 ```bash
 slides2html --website revealjs --presentationid 147sFqkzjr_caJrh5f4ZpRRdD0SZP32
