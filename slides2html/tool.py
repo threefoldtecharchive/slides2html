@@ -1,8 +1,11 @@
 import sys
 import os
+import os.path
 import json
 import shutil
+import re
 import click
+
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
@@ -20,6 +23,26 @@ def dir_images_as_htmltags(directory):
         dirbasename = os.path.basename(directory) #os.path.dirname(directory)
         images.append('<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p))
     return images
+
+def get_slides_info(directory):
+    slides_infos = []
+    main_meta = directory + ".html" + ".meta"
+
+    files = [x for x in os.listdir(directory) if x.endswith(".png") and "_" in x ]
+    files.sort(key=lambda k: int(k.split("_")[0]))
+    for p in files:
+        dirbasename = os.path.basename(directory) #os.path.dirname(directory)
+        meta = []
+        metapath = os.path.join(directory, p + ".meta")
+        if os.path.exists(metapath):
+            with open(metapath, "r") as mp:
+                meta_content = mp.read()
+                print(meta_content)
+                meta = re.findall(r'(https?://\S+)', meta_content)
+        image = '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p)
+        slides_infos.append({'slide_image':image, 'slide_meta': meta, 'title':presentation_title})
+
+    return slides_infos
 
 class Tool:
     def __init__(self, presentation_id, credfile="credentials.json"):
@@ -65,8 +88,9 @@ class Tool:
             template {[str]} -- [reveal.js template] (default: {BASIC_TEMPLATE})
         """
         self.downloader.download(destdir)
-        slides_as_images = dir_images_as_htmltags(destdir)
-        html = self.generator.generate_html(slides_as_images, revealjs_template=BASIC_TEMPLATE)
+        # slides_as_images = dir_images_as_htmltags(destdir)
+        slides_infos = get_slides_info(destdir)
+        html = self.generator.generate_html(slides_infos, revealjs_template=BASIC_TEMPLATE)
         if not entryfile:
             entryfile = self.presentation_id
 

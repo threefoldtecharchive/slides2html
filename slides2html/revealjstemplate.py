@@ -32,8 +32,21 @@ BASIC_TEMPLATE = """
 	<body>
 		<div class="reveal">
 			<div class="slides">
-                {% for slide in slides %}
-				<section>{{slide}}</section>
+                {% for slideinfo in slidesinfos %}
+				<section>
+					<div class="slide-meta">
+						<ul>
+						{% for el in slideinfo['slide_meta'] %}
+							<li class="slide-meta-item">
+								{{el}}
+							</li>
+						{% endfor %}
+						<ul>
+					</div>
+					<div class="slide-image">
+					{{slideinfo['slide_image']}}
+					</div>
+				</section>
                 {% endfor %}
 			</div>
 		</div>

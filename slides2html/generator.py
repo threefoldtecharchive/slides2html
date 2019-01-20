@@ -12,7 +12,7 @@ class Generator:
         """
         self.presentation_id = presentation_id
   
-    def generate_html(self, slides_as_images=None, revealjs_template=BASIC_TEMPLATE):
+    def generate_html(self, slides_infos, revealjs_template=BASIC_TEMPLATE):
         """Generate rendered HTML page from presentation (presentation_id)
         
         Keyword Arguments:
@@ -26,4 +26,5 @@ class Generator:
         #     raise RuntimeError("need to run self.save_slides_to_dir first.")
         
         template = Template(revealjs_template)
-        return template.render(slides=slides_as_images)
+        print(slides_infos)
+        return template.render(slidesinfos=slides_infos)

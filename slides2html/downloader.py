@@ -1,23 +1,37 @@
 import os
+import logging
 from concurrent.futures import ThreadPoolExecutor, wait
 import requests
 
+# logging.basicConfig()
+# logger = logging.getLogger('downloader')
 
-
-# The ID of a sample presentation.
+# The ID template for google presentation.
 DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE =  "https://docs.google.com/presentation/d/{presentationId}/export/jpeg?id={presentationId}&pageid={pageId}" 
 
 
 def download_entry(entry, destdir="/tmp"):
-    url, save_as = entry
+    url, save_as, slide_meta, presentation_title = entry
     destfile = os.path.join(destdir, save_as)
+    print("Downloading {} to {}".format(url, destfile))
+    metapath = destfile + ".meta"
+    print("Metapath: ", metapath)
+    with open(metapath, 'w') as f:
+        f.write("".join(slide_meta))
+        print("saved meta path: {}".format(metapath))
+
+    main_meta = os.path.join(destdir, save_as + ".meta")
+    
+    with open(main_meta, "w") as f:
+        f.write("title = {}".format(presentation_title))
+
     r = requests.get(url)
-    print(r.status_code, destfile)
+    # logger.debug("{} fetching {}".format(r.status_code, destfile))
     if r.status_code == 200 and not os.path.exists(destfile):
         with open(destfile, 'wb') as f:
             content = r.content
             f.write(content)
-    print(destfile)
+
     return destfile
 
 def download_entries(entries, destdir="/tmp"):
@@ -50,6 +64,7 @@ class Downloader:
     def _get_slides_download_info(self):
         presentation = self.service.presentations().get(
             presentationId=self.presentation_id).execute()
+        presentation_title = presentation['title']
         slides = presentation.get('slides')
         slides_ids = [slide["objectId"] for slide in slides]
  
@@ -57,13 +72,28 @@ class Downloader:
         zerofills = len(str(len(slides)))
         for i, slide_id in enumerate(slides_ids):
             # slide_index = slide_id.split("_")[2]
+            slide = slides[i]
+            slide_meta = []
+            notesPage = slide['slideProperties']['notesPage']
+            speakerNotesObjectId = notesPage['notesProperties']['speakerNotesObjectId'] #i3
+
+            pageElements = notesPage['pageElements']
+            for page_element in pageElements:
+                # if page_element['objectId'] == speakerNotesObjectId:
+                shape = page_element['shape']
+                if 'text' in shape and 'textElements' in shape['text']:
+                    for text_element in shape['text']['textElements']:
+                        if 'textRun' in text_element and 'content' in text_element['textRun']:
+                            slide_meta.append(text_element['textRun']['content'])
+        
+            # logger.debug("slide meta: {}".format(slide_meta))
             pageId = slide_id
             presentationId = self.presentation_id
             url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId, thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
             image_id = str(i).zfill(zerofills)
             save_as = "{image_id}_{page_id}.png".format(image_id=image_id, page_id=pageId)
             # print(save_as)
-            links.append((url, save_as))
+            links.append((url, save_as, slide_meta, presentation_title))
         return links
 
     def download(self, destdir):
