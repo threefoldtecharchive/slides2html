@@ -47,6 +47,7 @@ def get_slides_info(directory):
             with open(metapath, "r") as mp:
                 meta_content = mp.read()
                 meta = re.findall(r'(https?://\S+)', meta_content)
+        print("extracted meta :" , meta)
         image = '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p)
         slides_infos.append({'slide_image':image, 'slide_meta': meta, 'title':presentation_title})
 

@@ -10,8 +10,19 @@ from configparser import ConfigParser
 # The ID template for google presentation.
 DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE =  "https://docs.google.com/presentation/d/{presentationId}/export/jpeg?id={presentationId}&pageid={pageId}" 
 
-
 def download_entry(entry, destdir="/tmp"):
+    """Download single entry
+    
+    Arguments:
+        entry: Tuple -- (url, save_as, slide_meta, presentation_title)
+    
+    Keyword Arguments:
+        destdir {str} -- destination directory (default: {"/tmp"})
+    
+    Returns:
+        string -- [destination file to download]
+    """
+
     url, save_as, slide_meta, presentation_title = entry
     destfile = os.path.join(destdir, save_as)
 
@@ -20,12 +31,6 @@ def download_entry(entry, destdir="/tmp"):
     print("Metapath: ", metapath)
     with open(metapath, 'w') as f:
         f.write("".join(slide_meta))
-        print("saved meta path: {}".format(metapath))
-
-    main_meta = os.path.join(destdir, save_as + ".meta")
-    
-    with open(main_meta, "w") as f:
-        f.write("title = {}".format(presentation_title))
 
     r = requests.get(url)
     # logger.debug("{} fetching {}".format(r.status_code, destfile))
@@ -37,6 +42,15 @@ def download_entry(entry, destdir="/tmp"):
     return destfile
 
 def download_entries(entries, destdir="/tmp"):
+    """Download slides to destination website directory 
+    
+    Arguments:
+        entries List[(url, save_as, slide_meta, presentation_title)] -- [description]
+    
+    Keyword Arguments:
+        destdir {str} -- [description] (default: {"/tmp"})
+    """
+
     results = []
     os.makedirs(destdir, exist_ok=True)
 
@@ -87,14 +101,11 @@ class Downloader:
                     for text_element in shape['text']['textElements']:
                         if 'textRun' in text_element and 'content' in text_element['textRun']:
                             slide_meta.append(text_element['textRun']['content'])
-        
-            # logger.debug("slide meta: {}".format(slide_meta))
             pageId = slide_id
             presentationId = self.presentation_id
             url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId, thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
             image_id = str(i).zfill(zerofills)
             save_as = "{image_id}_{page_id}.png".format(image_id=image_id, page_id=pageId)
-            # print(save_as)
             links.append((url, save_as, slide_meta, presentation_title))
         return links, presentation_title
 
