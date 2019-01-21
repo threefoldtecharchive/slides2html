@@ -34,6 +34,7 @@ BASIC_TEMPLATE = """
 			<div class="slides">
                 {% for slideinfo in slidesinfos %}
 				<section>
+					<div class="presentation-title">{{presentation_title}}</div>
 					<div class="slide-meta">
 						<ul>
 						{% for el in slideinfo['slide_meta'] %}

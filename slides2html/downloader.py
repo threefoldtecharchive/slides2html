@@ -2,6 +2,7 @@ import os
 import logging
 from concurrent.futures import ThreadPoolExecutor, wait
 import requests
+from configparser import ConfigParser
 
 # logging.basicConfig()
 # logger = logging.getLogger('downloader')
@@ -13,6 +14,7 @@ DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE =  "https://docs.google.com/presentation/d/{pres
 def download_entry(entry, destdir="/tmp"):
     url, save_as, slide_meta, presentation_title = entry
     destfile = os.path.join(destdir, save_as)
+
     print("Downloading {} to {}".format(url, destfile))
     metapath = destfile + ".meta"
     print("Metapath: ", metapath)
@@ -75,7 +77,7 @@ class Downloader:
             slide = slides[i]
             slide_meta = []
             notesPage = slide['slideProperties']['notesPage']
-            speakerNotesObjectId = notesPage['notesProperties']['speakerNotesObjectId'] #i3
+            # speakerNotesObjectId = notesPage['notesProperties']['speakerNotesObjectId'] #i3
 
             pageElements = notesPage['pageElements']
             for page_element in pageElements:
@@ -94,7 +96,7 @@ class Downloader:
             save_as = "{image_id}_{page_id}.png".format(image_id=image_id, page_id=pageId)
             # print(save_as)
             links.append((url, save_as, slide_meta, presentation_title))
-        return links
+        return links, presentation_title
 
     def download(self, destdir):
         """Download images of self.presentation_id to destination dir
@@ -102,7 +104,22 @@ class Downloader:
         Arguments:
             destdir {str} -- destination dir.
         """
-        entries = self._get_slides_download_info()
+
+        entries, title = self._get_slides_download_info()
+
+        parser = ConfigParser()
+
+        website_dir = os.path.dirname(destdir)
+        presentations_meta_path = os.path.join(website_dir, "presentations.meta" )
+        if os.path.exists(presentations_meta_path):
+            parser.read(presentations_meta_path)
+        if not parser.has_section(self.presentation_id):
+            parser.add_section(self.presentation_id)
+        parser.set(self.presentation_id, 'title', title)
+        with open(presentations_meta_path, "w") as metafile:
+            parser.write(metafile)
+        
+
         download_entries(entries, destdir)
         print("done downloading.")
 

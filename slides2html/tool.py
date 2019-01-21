@@ -5,6 +5,7 @@ import json
 import shutil
 import re
 import click
+from configparser import ConfigParser
 
 from googleapiclient.discovery import build
 from httplib2 import Http
@@ -26,7 +27,15 @@ def dir_images_as_htmltags(directory):
 
 def get_slides_info(directory):
     slides_infos = []
-    main_meta = directory + ".html" + ".meta"
+    main_meta = "presentations.meta"
+    website_dir = os.path.dirname(directory)
+    main_meta_path = os.path.join(website_dir, main_meta)
+
+    parser = ConfigParser()
+
+    parser.read(main_meta_path)
+    presentation_id = os.path.basename(directory)
+    presentation_title = parser.get(presentation_id, 'title')
 
     files = [x for x in os.listdir(directory) if x.endswith(".png") and "_" in x ]
     files.sort(key=lambda k: int(k.split("_")[0]))
@@ -37,7 +46,6 @@ def get_slides_info(directory):
         if os.path.exists(metapath):
             with open(metapath, "r") as mp:
                 meta_content = mp.read()
-                print(meta_content)
                 meta = re.findall(r'(https?://\S+)', meta_content)
         image = '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p)
         slides_infos.append({'slide_image':image, 'slide_meta': meta, 'title':presentation_title})
