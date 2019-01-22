@@ -99,7 +99,7 @@ class Tool:
         self.downloader.download(destdir)
         # slides_as_images = dir_images_as_htmltags(destdir)
         slides_infos = get_slides_info(destdir)
-        html = self.generator.generate_html(slides_infos, revealjs_template=BASIC_TEMPLATE)
+        html = self.generator.generate_html(slides_infos, revealjs_template=template)
         if not entryfile:
             entryfile = self.presentation_id
 
@@ -113,7 +113,8 @@ class Tool:
 @click.option("--indexfile", help="index filename. will default to presentation id if not provided.", required=False)
 @click.option("--imagesize", help="image size (MEDIUM, LARGE)", default="medium", required=False)
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
-def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json"):
+@click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
+def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile=""):
 
     imagesize = imagesize.upper()
     if imagesize not in ["MEDIUM", "LARGE"]:
@@ -127,8 +128,15 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     if not os.path.exists(credfile):
         raise ValueError("Invalid credential file: {}".format(credfile))
     
+    theme = ""
+    themefilepath = os.path.expanduser(themefile)
+    if os.path.exists(themefilepath):
+        with open(themefilepath) as f:
+            theme = f.read()
+    else:
+        theme = BASIC_TEMPLATE
     # somehow the argv gets ruined when used from the flow tool.
     sys.argv = [] # TODO: find better solution
     p2h = Tool(id, credfile)
     p2h.downloader.thumbnailsize = imagesize
-    p2h.build_revealjs_site(destdir, indexfilepath)
+    p2h.build_revealjs_site(destdir, indexfilepath, template=theme)
