@@ -8,17 +8,18 @@ from configparser import ConfigParser
 # logger = logging.getLogger('downloader')
 
 # The ID template for google presentation.
-DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE =  "https://docs.google.com/presentation/d/{presentationId}/export/jpeg?id={presentationId}&pageid={pageId}" 
+DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE = "https://docs.google.com/presentation/d/{presentationId}/export/jpeg?id={presentationId}&pageid={pageId}"
+
 
 def download_entry(entry, destdir="/tmp"):
     """Download single entry
-    
+
     Arguments:
         entry: Tuple -- (url, save_as, slide_meta, presentation_title)
-    
+
     Keyword Arguments:
         destdir {str} -- destination directory (default: {"/tmp"})
-    
+
     Returns:
         string -- [destination file to download]
     """
@@ -41,12 +42,13 @@ def download_entry(entry, destdir="/tmp"):
 
     return destfile
 
+
 def download_entries(entries, destdir="/tmp"):
     """Download slides to destination website directory 
-    
+
     Arguments:
         entries List[(url, save_as, slide_meta, presentation_title)] -- [description]
-    
+
     Keyword Arguments:
         destdir {str} -- [description] (default: {"/tmp"})
     """
@@ -72,8 +74,8 @@ class Downloader:
         """
 
         self.presentation_id = presentation_id
-        self.service = service 
-        self.thumbnailsize = thumbnailsize.upper() # "LARGE."
+        self.service = service
+        self.thumbnailsize = thumbnailsize.upper()  # "LARGE."
         if thumbnailsize not in ["MEDIUM", "LARGE"]:
             raise ValueError("invalid thumbnailsize should be large or medium")
 
@@ -83,7 +85,7 @@ class Downloader:
         presentation_title = presentation['title']
         slides = presentation.get('slides')
         slides_ids = [slide["objectId"] for slide in slides]
- 
+
         links = []
         zerofills = len(str(len(slides)))
         for i, slide_id in enumerate(slides_ids):
@@ -100,18 +102,21 @@ class Downloader:
                 if 'text' in shape and 'textElements' in shape['text']:
                     for text_element in shape['text']['textElements']:
                         if 'textRun' in text_element and 'content' in text_element['textRun']:
-                            slide_meta.append(text_element['textRun']['content'])
+                            slide_meta.append(
+                                text_element['textRun']['content'])
             pageId = slide_id
             presentationId = self.presentation_id
-            url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId, thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
+            url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId,
+                                                                    thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
             image_id = str(i).zfill(zerofills)
-            save_as = "{image_id}_{page_id}.png".format(image_id=image_id, page_id=pageId)
+            save_as = "{image_id}_{page_id}.png".format(
+                image_id=image_id, page_id=pageId)
             links.append((url, save_as, slide_meta, presentation_title))
         return links, presentation_title
 
     def download(self, destdir):
         """Download images of self.presentation_id to destination dir
-        
+
         Arguments:
             destdir {str} -- destination dir.
         """
@@ -121,7 +126,9 @@ class Downloader:
         parser = ConfigParser()
 
         website_dir = os.path.dirname(destdir)
-        presentations_meta_path = os.path.join(website_dir, "presentations.meta" )
+        presentations_meta_path = os.path.join(
+            website_dir, "presentations.meta")
+
         if os.path.exists(presentations_meta_path):
             parser.read(presentations_meta_path)
         if not parser.has_section(self.presentation_id):
@@ -129,8 +136,6 @@ class Downloader:
         parser.set(self.presentation_id, 'title', title)
         with open(presentations_meta_path, "w") as metafile:
             parser.write(metafile)
-        
 
         download_entries(entries, destdir)
         print("done downloading.")
-
