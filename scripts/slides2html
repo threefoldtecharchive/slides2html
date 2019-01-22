@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import os
-from slides2html.tool import cli 
+from slides2html.tool import cli
 
 if __name__ == "__main__":
     cli()
