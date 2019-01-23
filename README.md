@@ -79,4 +79,42 @@ Options:
   --imagesize TEXT  image size (MEDIUM, LARGE)
   --credfile TEXT   credentials file path
   --help            Show this message and exit.
+  --themefile TEXT  Template file to use
 ```
+
+### Custom themes
+
+```bash
+slides2html --website /tmp/revealjs --id 1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU  --credfile credentials.json --themefile themes/basictheme.html
+```
+
+### Creating custom theme
+
+```html
+    <!-- base html code ommitted-->
+		<div class="reveal">
+			<div class="slides">
+                {% for slideinfo in slidesinfos %}
+				<section>
+					<div class="presentation-title">{{presentation_title}}</div>
+					<!-- <div class="slide-meta">
+						<ul>
+						{% for el in slideinfo['slide_meta'] %}
+							<li class="slide-meta-item">
+								{{el}}
+							</li>
+						{% endfor %}
+						<ul>
+					</div> -->
+					<div class="slide-image">
+					{{slideinfo['slide_image']}}
+					</div>
+				</section>
+                {% endfor %}
+			</div>
+    </div>
+```
+
+Templates are rendered with
+- `presentation_title` title of the presentation
+- `slidesinfos` list of slideinfo. `slideinfo['slide_meta']` has the links of the speakernotes, and `slideinfo['slide_image']` has the slide as image
