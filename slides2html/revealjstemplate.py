@@ -16,10 +16,11 @@ BASIC_TEMPLATE = """
 	<title>reveal.js</title>
 
 	<link rel="stylesheet" href="css/reveal.css">
+	<link rel="stylesheet" href="css/all.min.css">
 
 	<!-- Theme used for syntax highlighting of code -->
 	<link rel="stylesheet" href="lib/css/zenburn.css">
-
+	<link rel="stylesheet" href="css/styles.css">
 	<!-- Printing and PDF exports -->
 	<script>
 		var link = document.createElement('link');
@@ -38,18 +39,22 @@ BASIC_TEMPLATE = """
 				<div class="slide-image">
 					{{slideinfo['slide_image']}}
 				</div>
+				<a href="#toggle-menu" class="btn btn-secondary" id="toggle-menu" title="Show Speaker Notes"><i class="fas fa-angle-down fa-2x"></i></a>
 				{% if slideinfo['slide_meta'] | length > 0 %}
-					<aside class="notes">
-						{% for el in slideinfo['slide_meta'] %}
-						<a class="slide-meta-item" href={{el}} target="_blank">{{el}},</a>
-						{% endfor %}
-					</aside>
+
+				<aside class="notes">
+					{% for el in slideinfo['slide_meta'] %}
+					<a class="slide-meta-item" href={{el}} target="_blank">{{el}},</a>
+					{% endfor %}
+				</aside>
+
 				{% endif %}
 			</section>
 			{% endfor %}
 		</div>
 	</div>
 
+	<script src="js/jquery.min.js"></script>
 	<script src="lib/js/head.min.js"></script>
 	<script src="js/reveal.js"></script>
 
@@ -76,7 +81,17 @@ BASIC_TEMPLATE = """
 					}
 				}
 			],
-			showNotes: true
+			progress: false,
+			showNotes: true,
+		});
+	</script>
+
+	<script>
+		$('#toggle-menu').click(function (e) {
+			e.preventDefault();
+			e.stopPropagation();
+			$('.speaker-notes').toggleClass('toggled');
+			$(this).toggleClass('toggled');
 		});
 	</script>
 </body>
