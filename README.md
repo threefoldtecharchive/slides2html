@@ -118,3 +118,6 @@ slides2html --website /tmp/revealjs --id 1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0A
 Templates are rendered with
 - `presentation_title` title of the presentation
 - `slidesinfos` list of slideinfo. `slideinfo['slide_meta']` has the links of the speakernotes, and `slideinfo['slide_image']` has the slide as image
+
+## Owner
+[https://github.com/xmonader](@xmonader)
