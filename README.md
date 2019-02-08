@@ -120,4 +120,4 @@ Templates are rendered with
 - `slidesinfos` list of slideinfo. `slideinfo['slide_meta']` has the links of the speakernotes, and `slideinfo['slide_image']` has the slide as image
 
 ## Owner
-[https://github.com/xmonader](@xmonader)
+[@xmonader](https://github.com/xmonader)
