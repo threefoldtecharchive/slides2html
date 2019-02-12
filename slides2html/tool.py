@@ -6,10 +6,10 @@ import shutil
 import re
 import click
 from configparser import ConfigParser
-
 from googleapiclient.discovery import build
 from httplib2 import Http
 from oauth2client import file, client, tools
+from google.oauth2 import service_account
 from slides2html.generator import Generator
 from slides2html.downloader import Downloader
 from slides2html.revealjstemplate import BASIC_TEMPLATE
@@ -67,22 +67,16 @@ class Tool:
             RuntimeError -- [In case of invalid credential files.]
         """
         self.presentation_id = presentation_id
-        self.credfile = credfile
-        SCOPES = 'https://www.googleapis.com/auth/drive'
+        SCOPES = ['https://www.googleapis.com/auth/drive']
+
         if not os.path.exists(credfile):
             raise RuntimeError("please provide valid credentials.json file. https://console.developers.google.com/apis/credentials")
 
         userdir = os.path.expanduser("~")
-        tokenjson = os.path.join(userdir, ".token.json")
-        store = file.Storage(tokenjson)
-        creds = store.get()
+
         self.credfile = os.path.expanduser(credfile) 
-        print("credfile: ", credfile)
-        if not creds or creds.invalid:
-            flow = client.flow_from_clientsecrets(self.credfile, SCOPES)
-            creds = tools.run_flow(flow, store)
-            
-        service = build('slides', 'v1', http=creds.authorize(Http()))
+        credentials = service_account.Credentials.from_service_account_file(self.credfile, scopes=SCOPES)
+        service = build('slides', 'v1', credentials=credentials)
 
         self.downloader = Downloader(presentation_id, service)
         self.generator = Generator(presentation_id)
