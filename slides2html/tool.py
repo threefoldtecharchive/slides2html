@@ -1,14 +1,9 @@
-import sys
 import os
 import os.path
-import json
-import shutil
 import re
 import click
 from configparser import ConfigParser
 from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
 from google.oauth2 import service_account
 from slides2html.generator import Generator
 from slides2html.downloader import Downloader
@@ -18,12 +13,14 @@ from slides2html.revealjstemplate import BASIC_TEMPLATE
 def dir_images_as_htmltags(directory):
 
     images = []
-    files = [x for x in os.listdir(directory) if "png" in x and "_" in x ]
+    files = [x for x in os.listdir(directory) if "png" in x and "_" in x]
     files.sort(key=lambda k: int(k.split("_")[0]))
     for p in files:
-        dirbasename = os.path.basename(directory) #os.path.dirname(directory)
-        images.append('<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p))
+        dirbasename = os.path.basename(directory)
+        images.append(
+            '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p))
     return images
+
 
 def get_slides_info(directory):
     slides_infos = []
@@ -37,32 +34,36 @@ def get_slides_info(directory):
     presentation_id = os.path.basename(directory)
     presentation_title = parser.get(presentation_id, 'title')
 
-    files = [x for x in os.listdir(directory) if x.endswith(".png") and "_" in x ]
+    files = [x for x in os.listdir(
+        directory) if x.endswith(".png") and "_" in x]
     files.sort(key=lambda k: int(k.split("_")[0]))
     for p in files:
-        dirbasename = os.path.basename(directory) #os.path.dirname(directory)
+        dirbasename = os.path.basename(directory)
         meta = []
         metapath = os.path.join(directory, p + ".meta")
         if os.path.exists(metapath):
             with open(metapath, "r") as mp:
                 meta_content = mp.read()
                 meta = re.findall(r'(https?://\S+)', meta_content)
-        print("extracted meta :" , meta)
-        image = '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(dirbasename=dirbasename, p=p)
-        slides_infos.append({'slide_image':image, 'slide_meta': meta, 'title':presentation_title})
+        print("extracted meta :", meta)
+        image = '<img src="./{dirbasename}/{p}" alt="{p}" />'.format(
+            dirbasename=dirbasename, p=p)
+        slides_infos.append(
+            {'slide_image': image, 'slide_meta': meta, 'title': presentation_title})
 
     return slides_infos
+
 
 class Tool:
     def __init__(self, presentation_id, credfile="credentials.json"):
         """Initialize slides2html tool.
-        
+
         Arguments:
             presentation_id {[str]} -- presentation id (e.g "147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM")
-        
+
         Keyword Arguments:
-            credfile {str} -- [description] (default: {"credentials.json"}) 
-        
+            credfile {str} -- [description] (default: {"credentials.json"})
+
         Raises:
             RuntimeError -- [In case of invalid credential files.]
         """
@@ -70,12 +71,12 @@ class Tool:
         SCOPES = ['https://www.googleapis.com/auth/drive']
 
         if not os.path.exists(credfile):
-            raise RuntimeError("please provide valid credentials.json file. https://console.developers.google.com/apis/credentials")
+            raise RuntimeError(
+                "please provide valid credentials.json file. https://console.developers.google.com/apis/credentials")
 
-        userdir = os.path.expanduser("~")
-
-        self.credfile = os.path.expanduser(credfile) 
-        credentials = service_account.Credentials.from_service_account_file(self.credfile, scopes=SCOPES)
+        self.credfile = os.path.expanduser(credfile)
+        credentials = service_account.Credentials.from_service_account_file(
+            self.credfile, scopes=SCOPES)
         service = build('slides', 'v1', credentials=credentials)
 
         self.downloader = Downloader(presentation_id, service)
@@ -83,7 +84,7 @@ class Tool:
 
     def build_revealjs_site(self, destdir="", entryfile="", presentation_dir="", template=BASIC_TEMPLATE):
         """Build reveal.js based website
-        
+
         Keyword Arguments:
             destdir {str} -- directory under reveal.js website directory (default: {""})
             entryfile {str} -- index file name (default: presentation id)
@@ -93,7 +94,8 @@ class Tool:
         self.downloader.download(destdir)
         # slides_as_images = dir_images_as_htmltags(destdir)
         slides_infos = get_slides_info(destdir)
-        html = self.generator.generate_html(slides_infos, revealjs_template=template)
+        html = self.generator.generate_html(
+            slides_infos, revealjs_template=template)
         if not entryfile:
             entryfile = self.presentation_id
 
@@ -121,7 +123,7 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     credfile = os.path.abspath(os.path.expanduser(credfile))
     if not os.path.exists(credfile):
         raise ValueError("Invalid credential file: {}".format(credfile))
-    
+
     theme = ""
     themefilepath = os.path.expanduser(themefile)
     if os.path.exists(themefilepath):
@@ -129,8 +131,7 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
             theme = f.read()
     else:
         theme = BASIC_TEMPLATE
-    # somehow the argv gets ruined when used from the flow tool.
-    sys.argv = [] # TODO: find better solution
+
     p2h = Tool(id, credfile)
     p2h.downloader.thumbnailsize = imagesize
     p2h.build_revealjs_site(destdir, indexfilepath, template=theme)

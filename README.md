@@ -7,11 +7,23 @@
 The tool converts the slides of a (Google) presentation into images (PNG) using the Google API and generates entry point file with reveal.js templates.
 
 ### Get credentials
-You need to enable and download credentials files using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com) or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
+
+Using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com)
+
+- Create project 
+- Create credentials (type service account)
+You need to enable and download credentials files using  or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
+- Download credentials (as json and save it anywhere on your filesystem)
 
 ## Installation
 - `git clone https://github.com/threefoldtech/slides2html`
 - `pip3 install .` or `python3 setup.py install`
+- in case of any dependency problems make sure to `pip install -r requirements.txt`
+
+## Dev installation
+- `git clone https://github.com/threefoldtech/slides2html`
+- `cd slides2html && pipenv --three && pipenv shell`
+- `pip3 install -e .` or `python3 setup.py install`
 - in case of any dependency problems make sure to `pip install -r requirements.txt`
 
 ## Usage

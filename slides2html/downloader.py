@@ -1,5 +1,4 @@
 import os
-import logging
 from concurrent.futures import ThreadPoolExecutor, wait
 import requests
 from configparser import ConfigParser
@@ -34,7 +33,6 @@ def download_entry(entry, destdir="/tmp"):
         f.write("".join(slide_meta))
 
     r = requests.get(url)
-    # logger.debug("{} fetching {}".format(r.status_code, destfile))
     if r.status_code == 200 and not os.path.exists(destfile):
         with open(destfile, 'wb') as f:
             content = r.content
@@ -44,7 +42,7 @@ def download_entry(entry, destdir="/tmp"):
 
 
 def download_entries(entries, destdir="/tmp"):
-    """Download slides to destination website directory 
+    """Download slides to destination website directory
 
     Arguments:
         entries List[(url, save_as, slide_meta, presentation_title)] -- [description]
@@ -66,7 +64,7 @@ def download_entries(entries, destdir="/tmp"):
 class Downloader:
     def __init__(self, presentation_id, service, thumbnailsize="MEDIUM"):
         """
-        Download class responsible for downloading slides as images 
+        Download class responsible for downloading slides as images
         Arguments:
             presentation_id {str} -- presentation id from google presentation id
             service {Service} -- Google api service (created by build)
