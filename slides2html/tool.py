@@ -128,7 +128,7 @@ class Tool:
 @click.option("--imagesize", help="image size (MEDIUM, LARGE)", default="medium", required=False)
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
-@click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, required=False)
+@click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, is_flag=True, required=False)
 def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False):
 
     imagesize = imagesize.upper()

@@ -10,6 +10,10 @@ The tool converts the slides of a (Google) presentation into images (PNG) using 
 
 Using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com)
 
+### Normal account
+You need to enable and download credentials files using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com) or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
+
+### Service account 
 - Create project 
 - Create credentials (type service account)
 You need to enable and download credentials files using  or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
@@ -26,7 +30,7 @@ You need to enable and download credentials files using  or go to [Python Quicks
 - `pip3 install -e .` or `python3 setup.py install`
 - in case of any dependency problems make sure to `pip install -r requirements.txt`
 
-## Usage
+## Example usage
 
 - Download basic release from https://github.com/hakimel/reveal.js
 - Untar it into suitable directory (e.g `/tmp/revealjs`)
@@ -78,6 +82,12 @@ slides2html --website /tmp/revealjs --id 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDN
 
 ```
 
+### Usage with service account
+
+The only change you need is `--serviceaccount`
+```bash
+slides2html --website /tmp/revealjs --id 1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU --credfile service_credentials.json --serviceaccount
+```
 
 ## Usage
 ```bash
@@ -92,6 +102,7 @@ Options:
   --credfile TEXT   credentials file path
   --help            Show this message and exit.
   --themefile TEXT  Template file to use
+  --serviceaccount  Use service account provider (mainly for server usages)
 ```
 
 ### Custom themes
