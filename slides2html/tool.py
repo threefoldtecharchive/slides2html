@@ -3,6 +3,8 @@ import os.path
 import re
 import click
 from configparser import ConfigParser
+from httplib2 import Http
+from oauth2client import file, client, tools
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from slides2html.generator import Generator
@@ -55,7 +57,7 @@ def get_slides_info(directory):
 
 
 class Tool:
-    def __init__(self, presentation_id, credfile="credentials.json"):
+    def __init__(self, presentation_id, credfile="credentials.json", serviceaccount=False):
         """Initialize slides2html tool.
 
         Arguments:
@@ -66,6 +68,7 @@ class Tool:
 
         Raises:
             RuntimeError -- [In case of invalid credential files.]
+
         """
         self.presentation_id = presentation_id
         SCOPES = ['https://www.googleapis.com/auth/drive']
@@ -75,15 +78,31 @@ class Tool:
                 "please provide valid credentials.json file. https://console.developers.google.com/apis/credentials")
 
         self.credfile = os.path.expanduser(credfile)
-        credentials = service_account.Credentials.from_service_account_file(
-            self.credfile, scopes=SCOPES)
-        service = build('slides', 'v1', credentials=credentials)
+        print("credfile: ", self.credfile)
+
+        credentials = None
+        service = None
+        if serviceaccount:
+            credentials = service_account.Credentials.from_service_account_file(
+                self.credfile, scopes=SCOPES)
+            service = build('slides', 'v1', credentials=credentials)
+        else:
+            userdir = os.path.expanduser("~")
+            tokenjson = os.path.join(userdir, ".token.json")
+            store = file.Storage(tokenjson)
+            credentials = store.get()
+            self.credfile = os.path.expanduser(credfile)
+            if not credentials or credentials.invalid:
+                flow = client.flow_from_clientsecrets(self.credfile, SCOPES)
+                credentials = tools.run_flow(flow, store)
+
+            service = build('slides', 'v1', http=credentials.authorize(Http()))
 
         self.downloader = Downloader(presentation_id, service)
         self.generator = Generator(presentation_id)
 
     def build_revealjs_site(self, destdir="", entryfile="", presentation_dir="", template=BASIC_TEMPLATE):
-        """Build reveal.js based website
+        """Build reveal.js based website.
 
         Keyword Arguments:
             destdir {str} -- directory under reveal.js website directory (default: {""})
@@ -92,7 +111,6 @@ class Tool:
             template {[str]} -- [reveal.js template] (default: {BASIC_TEMPLATE})
         """
         self.downloader.download(destdir)
-        # slides_as_images = dir_images_as_htmltags(destdir)
         slides_infos = get_slides_info(destdir)
         html = self.generator.generate_html(
             slides_infos, revealjs_template=template)
@@ -110,7 +128,8 @@ class Tool:
 @click.option("--imagesize", help="image size (MEDIUM, LARGE)", default="medium", required=False)
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
-def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile=""):
+@click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, required=False)
+def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False):
 
     imagesize = imagesize.upper()
     if imagesize not in ["MEDIUM", "LARGE"]:
@@ -132,6 +151,6 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     else:
         theme = BASIC_TEMPLATE
 
-    p2h = Tool(id, credfile)
+    p2h = Tool(id, credfile, serviceaccount=serviceaccount)
     p2h.downloader.thumbnailsize = imagesize
     p2h.build_revealjs_site(destdir, indexfilepath, template=theme)
