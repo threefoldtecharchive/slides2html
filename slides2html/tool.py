@@ -11,6 +11,43 @@ from slides2html.generator import Generator
 from slides2html.downloader import Downloader
 from slides2html.revealjstemplate import BASIC_TEMPLATE
 
+import re
+
+
+def get_presentation_id(url):
+    """
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4c7fe486b7_0_0
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4f00846b3a_0_0
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit
+    """
+
+    res = re.findall("presentation/d/(.+?)/edit", url)
+    if res:
+        return res[0]
+    return None
+
+
+def get_slide_id(url):
+    """
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4c7fe486b7_0_0
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4f00846b3a_0_0
+        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit
+    """
+    res = re.findall("edit#slide=id.(.+?)$", url)
+    if res:
+        return res[0]
+    return None
+
+
+def link_info(url):
+    if not url.startswith("http"):
+        raise ValueError("invalid url.")
+    presentation_id = get_presentation_id(url)
+    slide_id = get_slide_id(url)
+    if presentation_id is None:
+        raise ValueError("invalid presentation url.")
+    return presentation_id, slide_id
+
 
 def dir_images_as_htmltags(directory):
 
@@ -61,7 +98,7 @@ class Tool:
         """Initialize slides2html tool.
 
         Arguments:
-            presentation_id {[str]} -- presentation id (e.g "147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM")
+            presentation_id {[str]} -- presentation id (e.g "147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM or full url.")
 
         Keyword Arguments:
             credfile {str} -- [description] (default: {"credentials.json"})
@@ -123,22 +160,27 @@ class Tool:
 
 @click.command()
 @click.option("--website", help="Reveal.js site directory", required=True)
-@click.option("--id", help="presentation id", required=True)
+@click.option("--id", help="presentation url or id", required=True)
 @click.option("--indexfile", help="index filename. will default to presentation id if not provided.", required=False)
 @click.option("--imagesize", help="image size (MEDIUM, LARGE)", default="medium", required=False)
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
 @click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, is_flag=True, required=False)
 def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False):
-
+    presentation_id = id
+    try:
+        presentation_id, slide_id = link_info(id)
+    except ValueError:  # not a url, people using id as in old version.
+        pass
     imagesize = imagesize.upper()
     if imagesize not in ["MEDIUM", "LARGE"]:
         raise ValueError("Invalid image size should be MEDIUM or LARGE")
     if not indexfile:
-        indexfilepath = os.path.join(website, "{}.html".format(id))
+        indexfilepath = os.path.join(website, "{}.html".format(presentation_id))
     else:
         indexfilepath = os.path.join(website, "{}.html".format(indexfile))
-    destdir = os.path.join(website, id)
+
+    destdir = os.path.join(website, presentation_id)
     credfile = os.path.abspath(os.path.expanduser(credfile))
     if not os.path.exists(credfile):
         raise ValueError("Invalid credential file: {}".format(credfile))
@@ -151,6 +193,6 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     else:
         theme = BASIC_TEMPLATE
 
-    p2h = Tool(id, credfile, serviceaccount=serviceaccount)
+    p2h = Tool(presentation_id, credfile, serviceaccount=serviceaccount)
     p2h.downloader.thumbnailsize = imagesize
     p2h.build_revealjs_site(destdir, indexfilepath, template=theme)
