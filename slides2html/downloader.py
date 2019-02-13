@@ -2,12 +2,21 @@ import os
 from concurrent.futures import ThreadPoolExecutor, wait
 import requests
 from configparser import ConfigParser
+from slides2html.google_links_utils import get_slide_id, get_presentation_id, link_info
 
 # logging.basicConfig()
 # logger = logging.getLogger('downloader')
 
 # The ID template for google presentation.
 DOWNLOAD_SLIDE_AS_JPEG_TEMPLATE = "https://docs.google.com/presentation/d/{presentationId}/export/jpeg?id={presentationId}&pageid={pageId}"
+
+
+def download_one(url, destfile):
+    r = requests.get(url)
+    if r.status_code == 200 and not os.path.exists(destfile):
+        with open(destfile, 'wb') as f:
+            content = r.content
+            f.write(content)
 
 
 def download_entry(entry, destdir="/tmp"):
@@ -32,11 +41,7 @@ def download_entry(entry, destdir="/tmp"):
     with open(metapath, 'w') as f:
         f.write("".join(slide_meta))
 
-    r = requests.get(url)
-    if r.status_code == 200 and not os.path.exists(destfile):
-        with open(destfile, 'wb') as f:
-            content = r.content
-            f.write(content)
+    download_one(url, destfile)
 
     return destfile
 
@@ -112,6 +117,52 @@ class Downloader:
             links.append((url, save_as, slide_meta, presentation_title))
         return links, presentation_title
 
+    def get_background(self, slidelink, destdir):
+        presentation_id, background_slide_id = link_info(slidelink)
+
+        if not background_slide_id:
+            raise ValueError("invalid slide link")
+        presentation = self.service.presentations().get(
+            presentationId=presentation_id).execute()
+        presentation_title = presentation['title']
+        slides = presentation.get('slides')
+        slides_ids = [slide["objectId"] for slide in slides]
+
+        links = []
+        zerofills = len(str(len(slides)))
+
+        if len(background_slide_id) < 5:
+            background_slide_id = slides_ids[0]
+
+        for i, slide_id in enumerate(slides_ids):
+            if slide_id != background_slide_id:
+                continue
+            else:
+                slide = slides[i]
+                slide_meta = []
+                notesPage = slide['slideProperties']['notesPage']
+                # speakerNotesObjectId = notesPage['notesProperties']['speakerNotesObjectId'] #i3
+
+                pageElements = notesPage['pageElements']
+                for page_element in pageElements:
+                    # if page_element['objectId'] == speakerNotesObjectId:
+                    shape = page_element['shape']
+                    if 'text' in shape and 'textElements' in shape['text']:
+                        for text_element in shape['text']['textElements']:
+                            if 'textRun' in text_element and 'content' in text_element['textRun']:
+                                slide_meta.append(
+                                    text_element['textRun']['content'])
+                pageId = slide_id
+                presentationId = presentation_id
+                url = self.service.presentations().pages().getThumbnail(presentationId=presentationId, pageObjectId=pageId,
+                                                                        thumbnailProperties_thumbnailSize=self.thumbnailsize).execute()["contentUrl"]
+                image_id = str(i).zfill(zerofills)
+                save_as = "background_{image_id}_{page_id}.png".format(
+                    image_id=image_id, page_id=pageId)
+                save_as_path = os.path.join(destdir, save_as)
+                download_one(url, save_as_path)
+                return save_as_path
+
     def download(self, destdir):
         """Download images of self.presentation_id to destination dir
 
@@ -136,4 +187,6 @@ class Downloader:
             parser.write(metafile)
 
         download_entries(entries, destdir)
+
         print("done downloading.")
+        return (entries, destdir)

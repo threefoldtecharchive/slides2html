@@ -7,52 +7,17 @@ from httplib2 import Http
 from oauth2client import file, client, tools
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
+from slides2html.google_links_utils import get_slide_id, get_presentation_id, link_info
+from slides2html.image_utils import images_to_transparent_background, set_background_for_images
 from slides2html.generator import Generator
 from slides2html.downloader import Downloader
 from slides2html.revealjstemplate import BASIC_TEMPLATE
-
-import re
-
-
-def get_presentation_id(url):
-    """
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4c7fe486b7_0_0
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4f00846b3a_0_0
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit
-    """
-
-    res = re.findall("presentation/d/(.+?)/edit", url)
-    if res:
-        return res[0]
-    return None
-
-
-def get_slide_id(url):
-    """
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4c7fe486b7_0_0
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.g4f00846b3a_0_0
-        https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit
-    """
-    res = re.findall("edit#slide=id.(.+?)$", url)
-    if res:
-        return res[0]
-    return None
-
-
-def link_info(url):
-    if not url.startswith("http"):
-        raise ValueError("invalid url.")
-    presentation_id = get_presentation_id(url)
-    slide_id = get_slide_id(url)
-    if presentation_id is None:
-        raise ValueError("invalid presentation url.")
-    return presentation_id, slide_id
 
 
 def dir_images_as_htmltags(directory):
 
     images = []
-    files = [x for x in os.listdir(directory) if "png" in x and "_" in x]
+    files = [x for x in os.listdir(directory) if x.endswith("png") and "_" in x and "background_" not in x]
     files.sort(key=lambda k: int(k.split("_")[0]))
     for p in files:
         dirbasename = os.path.basename(directory)
@@ -74,7 +39,7 @@ def get_slides_info(directory):
     presentation_title = parser.get(presentation_id, 'title')
 
     files = [x for x in os.listdir(
-        directory) if x.endswith(".png") and "_" in x]
+        directory) if x.endswith(".png") and "_" in x and "background" not in x]
     files.sort(key=lambda k: int(k.split("_")[0]))
     for p in files:
         dirbasename = os.path.basename(directory)
@@ -157,6 +122,12 @@ class Tool:
         with open(entryfile, "w") as f:
             f.write(html)
 
+    def convert_to_transparent_background(self, destdir):
+        images_to_transparent_background(destdir)
+
+    def set_images_background(self, destdir, bgpath):
+        set_background_for_images(destdir, bgpath)
+
 
 @click.command()
 @click.option("--website", help="Reveal.js site directory", required=True)
@@ -166,7 +137,8 @@ class Tool:
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
 @click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, is_flag=True, required=False)
-def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False):
+@click.option("--background", help="background image to be used for all of the slides", required=False)
+def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False, background=None):
     presentation_id = id
     try:
         presentation_id, slide_id = link_info(id)
@@ -196,3 +168,8 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     p2h = Tool(presentation_id, credfile, serviceaccount=serviceaccount)
     p2h.downloader.thumbnailsize = imagesize
     p2h.build_revealjs_site(destdir, indexfilepath, template=theme)
+
+    if background is not None:
+        bgpath = p2h.downloader.get_background(background, destdir)
+        p2h.convert_to_transparent_background(destdir)
+        p2h.set_images_background(destdir, bgpath)
