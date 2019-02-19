@@ -94,15 +94,17 @@ slides2html --website /tmp/revealjs --id 1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0A
 Usage: slides2html [OPTIONS]
 
 Options:
-  --website TEXT    Reveal.js site directory  [required]
-  --id TEXT         presentation id  [required]
-  --indexfile TEXT  index filename. will default to presentation id if
-                    not provided.
-  --imagesize TEXT  image size (MEDIUM, LARGE)
-  --credfile TEXT   credentials file path
-  --help            Show this message and exit.
-  --themefile TEXT  Template file to use
-  --serviceaccount  Use service account provider (mainly for server usages)
+  --website TEXT     Reveal.js site directory  [required]
+  --id TEXT          presentation url or id  [required]
+  --indexfile TEXT   index filename. will default to presentation id if not
+                     provided.
+  --imagesize TEXT   image size (MEDIUM, LARGE)
+  --credfile TEXT    credentials file path
+  --themefile TEXT   use your own reveal.js theme
+  --serviceaccount   use service account instead of normal oauth flow
+  --background TEXT  background image to be used for all of the slides
+  --help             Show this message and exit.
+
 ```
 
 ### Custom themes
