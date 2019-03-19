@@ -103,8 +103,18 @@ Options:
   --themefile TEXT   use your own reveal.js theme
   --serviceaccount   use service account instead of normal oauth flow
   --background TEXT  background image to be used for all of the slides
+	--resize 'WIDTH,HEIGHT' width and height for the new size
   --help             Show this message and exit.
 
+```
+
+### resizing images
+Google allows exporting images as MEDIUM or LARGE if you want to do some resizing to specific size you can use `--resize` parameter and pass the new size in the form of `'newwidth, newheight'
+
+e.g 
+```bash
+slides2html --website /tmp/revealjs --id 'https://docs.google.com/presentation/d/1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU/edit#slide=id.p' --credfile ~/service_credentials.json --themefile themes/basictheme.html --serviceaccount --background 'https://docs.google.com/presentation/d/1F6abB7ceOROpmbaMIWcx9RNbW_oIiLg8B5J77M5hy3s/edit#slide=id.p' --resize '200,200'
+credfile:  /home/xmonader
 ```
 
 ### Custom themes
