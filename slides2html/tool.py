@@ -8,7 +8,7 @@ from oauth2client import file, client, tools
 from googleapiclient.discovery import build
 from google.oauth2 import service_account
 from slides2html.google_links_utils import get_slide_id, get_presentation_id, link_info
-from slides2html.image_utils import images_to_transparent_background, set_background_for_images
+from slides2html.image_utils import images_to_transparent_background, set_background_for_images, resize_images
 from slides2html.generator import Generator
 from slides2html.downloader import Downloader
 from slides2html.revealjstemplate import BASIC_TEMPLATE
@@ -138,7 +138,8 @@ class Tool:
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
 @click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, is_flag=True, required=False)
 @click.option("--background", help="background image to be used for all of the slides", required=False)
-def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False, background=None):
+@click.option("--resize", help="resize image of (width,height)", required=False)
+def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False, background=None, resize=None):
     presentation_id = id
     try:
         presentation_id, slide_id = link_info(id)
@@ -147,6 +148,13 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
     imagesize = imagesize.upper()
     if imagesize not in ["MEDIUM", "LARGE"]:
         raise ValueError("Invalid image size should be MEDIUM or LARGE")
+
+    if resize and "," in resize:
+        try:
+            newwidth, newheight = map(lambda x: int(x.strip()), resize.split(","))
+        except:
+            raise ValueError("invalid size for --resize {}: should be 'width,height' ".format(resize))
+
     if not indexfile:
         indexfilepath = os.path.join(website, "{}.html".format(presentation_id))
     else:
@@ -173,3 +181,7 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
         bgpath = p2h.downloader.get_background(background, destdir)
         p2h.convert_to_transparent_background(destdir)
         p2h.set_images_background(destdir, bgpath)
+
+    if resize and "," in resize:
+        newwidth, newheight = map(lambda x: int(x.strip()), resize.split(","))
+        resize_images(destdir, (newwidth, newheight))
