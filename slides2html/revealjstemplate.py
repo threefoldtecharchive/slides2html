@@ -13,21 +13,18 @@ BASIC_TEMPLATE = """
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
-    <title>reveal.js</title>
+    <title>Basic Website</title>
 
-    <link rel="stylesheet" href="css/reveal.css">
 
-    <!-- Theme used for syntax highlighting of code -->
-    <link rel="stylesheet" href="lib/css/zenburn.css">
+		<link rel="stylesheet" href="https://unpkg.com/reveal.js@4.1.3/dist/reveal.css" />
+		<script src="https://unpkg.com/reveal.js@4.1.3/dist/reveal.js"></script>
+		<!-- Theme used for syntax highlighting of code -->
+		
+        <link rel="stylesheet" href="https://unpkg.com/reveal.js@4.1.3/dist/theme/black.css"/>
+  <!-- Printing and PDF exports -->
+  
+  
 
-    <!-- Printing and PDF exports -->
-    <script>
-        var link = document.createElement('link');
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.href = window.location.search.match(/print-pdf/gi) ? 'css/print/pdf.css' : 'css/print/paper.css';
-        document.getElementsByTagName('head')[0].appendChild(link);
-    </script>
 </head>
 
 <body>
@@ -50,32 +47,13 @@ BASIC_TEMPLATE = """
         </div>
     </div>
 
-    <script src="lib/js/head.min.js"></script>
-    <script src="js/reveal.js"></script>
 
     <script>
         // More info about config & dependencies:
         // - https://github.com/hakimel/reveal.js#configuration
         // - https://github.com/hakimel/reveal.js#dependencies
         Reveal.initialize({
-            dependencies: [{
-                    src: 'plugin/markdown/marked.js'
-                },
-                {
-                    src: 'plugin/markdown/markdown.js'
-                },
-                {
-                    src: 'plugin/notes/notes.js',
-                    async: true
-                },
-                {
-                    src: 'plugin/highlight/highlight.js',
-                    async: true,
-                    callback: function () {
-                        hljs.initHighlightingOnLoad();
-                    }
-                }
-            ],
+
             showNotes: true
         });
     </script>

@@ -8,27 +8,20 @@ The tool converts the slides of a (Google) presentation into images (PNG) using 
 
 ### Get credentials
 
-Using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com)
+Make sure to enable the [slides API](https://developers.google.com/slides/api/guides/overview) first thing Using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com)
 
-### Normal account
-You need to enable and download credentials files using [Google console](https://console.developers.google.com/flows/enableapi?apiid=slides.googleapis.com) or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
 
 ### Service account 
 - Create project 
 - Create credentials (type service account)
 You need to enable and download credentials files using  or go to [Python Quickstart](https://developers.google.com/slides/quickstart/python) and choose enable slides API then download configurations.
 - Download credentials (as json and save it anywhere on your filesystem)
+- IMPORTANT NOTE: after creating the service account you `MUST` share the presentation file with its email 
+- https://console.cloud.google.com/apis create a project and then credentials of type `JSON`
 
 ## Installation
 - `git clone https://github.com/threefoldtech/slides2html`
-- `pip3 install .` or `python3 setup.py install`
-- in case of any dependency problems make sure to `pip install -r requirements.txt`
-
-## Dev installation
-- `git clone https://github.com/threefoldtech/slides2html`
-- `cd slides2html && pipenv --three && pipenv shell`
-- `pip3 install -e .` or `python3 setup.py install`
-- in case of any dependency problems make sure to `pip install -r requirements.txt`
+- `poetry install`
 
 ## Example usage
 
@@ -37,7 +30,8 @@ You need to enable and download credentials files using  or go to [Python Quicks
 - Get credentials from [Google API Console](https://console.developers.google.com/apis/credentials) and save it on your filesystem (e.g `/tmp/credentials.json`)
 - Convert using `slides2html`
 ```bash
-slides2html --website /tmp/revealjs --id 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM  --credfile ~/credentials.json
+poetry run slides2html --website /tmp/revealjs --id https://docs.google.com/presentation/d/1isgrOz-TRMQtAnPk96JV8iG1XqeH73trsF-upTkFJbw/edit\#slide\=id.gdb0fd0098c_0_81 --credfile /tmp/creds.json --serviceaccount
+
 ```
 - in `/tmp/revealjs` directory there will be entrypoint (customizable using `--indexfile` option) `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM.html` and directory named `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM`
 
@@ -122,6 +116,8 @@ credfile:  /home/xmonader
 ```bash
 slides2html --website /tmp/revealjs --id 1N8YWE7ShqmhQphT6L29-AcEKZfZg2QripM4L0AK8mSU  --credfile credentials.json --themefile themes/basictheme.html
 ```
+
+Please note: all themes are using the same code for now (you won't notice a difference)
 
 ### Creating custom theme
 
