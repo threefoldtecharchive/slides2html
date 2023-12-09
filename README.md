@@ -21,14 +21,7 @@ You need to enable and download credentials files using  or go to [Python Quicks
 
 ## Installation
 - `git clone https://github.com/threefoldtech/slides2html`
-- `pip3 install .` or `python3 setup.py install`
-- in case of any dependency problems make sure to `pip install -r requirements.txt`
-
-## Dev installation
-- `git clone https://github.com/threefoldtech/slides2html`
-- `cd slides2html && pipenv --three && pipenv shell`
-- `pip3 install -e .` or `python3 setup.py install`
-- in case of any dependency problems make sure to `pip install -r requirements.txt`
+- `poetry install`
 
 ## Example usage
 
@@ -37,7 +30,8 @@ You need to enable and download credentials files using  or go to [Python Quicks
 - Get credentials from [Google API Console](https://console.developers.google.com/apis/credentials) and save it on your filesystem (e.g `/tmp/credentials.json`)
 - Convert using `slides2html`
 ```bash
-slides2html --website /tmp/revealjs --id 147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM  --credfile ~/credentials.json
+poetry run slides2html --website /tmp/revealjs --id https://docs.google.com/presentation/d/1isgrOz-TRMQtAnPk96JV8iG1XqeH73trsF-upTkFJbw/edit\#slide\=id.gdb0fd0098c_0_81 --credfile /tmp/creds.json --serviceaccount
+
 ```
 - in `/tmp/revealjs` directory there will be entrypoint (customizable using `--indexfile` option) `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM.html` and directory named `147sFqkzjr_caJrh5f4ZpRRdD0SZP32aGSBkfDNH31PM`
 
