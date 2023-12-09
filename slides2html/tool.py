@@ -59,7 +59,7 @@ def get_slides_info(directory):
 
 
 class Tool:
-    def __init__(self, presentation_id, credfile="credentials.json", serviceaccount=False):
+    def __init__(self, presentation_id, credfile="credentials.json", serviceaccount=True):
         """Initialize slides2html tool.
 
         Arguments:
@@ -84,21 +84,13 @@ class Tool:
 
         credentials = None
         service = None
+        print("USING SERVICE ACCOUNT: ", serviceaccount)
         if serviceaccount:
             credentials = service_account.Credentials.from_service_account_file(
                 self.credfile, scopes=SCOPES)
             service = build('slides', 'v1', credentials=credentials)
         else:
-            userdir = os.path.expanduser("~")
-            tokenjson = os.path.join(userdir, ".token.json")
-            store = file.Storage(tokenjson)
-            credentials = store.get()
-            self.credfile = os.path.expanduser(credfile)
-            if not credentials or credentials.invalid:
-                flow = client.flow_from_clientsecrets(self.credfile, SCOPES)
-                credentials = tools.run_flow(flow, store)
-
-            service = build('slides', 'v1', http=credentials.authorize(Http()))
+            raise Exception('slides2html only supports service accounts')
 
         self.downloader = Downloader(presentation_id, service)
         self.generator = Generator(presentation_id)
@@ -136,10 +128,9 @@ class Tool:
 @click.option("--imagesize", help="image size (MEDIUM, LARGE)", default="medium", required=False)
 @click.option("--credfile", help="credentials file path", default="credentials.json", required=False)
 @click.option("--themefile", help="use your own reveal.js theme", default="", required=False)
-@click.option("--serviceaccount", help="use service account instead of normal oauth flow", default=False, is_flag=True, required=False)
 @click.option("--background", help="background image to be used for all of the slides", required=False)
 @click.option("--resize", help="resize image of (width,height)", required=False)
-def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", serviceaccount=False, background=None, resize=None):
+def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.json", themefile="", background=None, resize=None):
     presentation_id = id
     try:
         presentation_id, slide_id = link_info(id)
@@ -162,6 +153,9 @@ def cli(website, id, indexfile="", imagesize="medium", credfile="credentials.jso
 
     destdir = os.path.join(website, presentation_id)
     credfile = os.path.abspath(os.path.expanduser(credfile))
+    serviceaccount = True #force it, don't know why it's not reflected
+    print("CREDFILE PATH: ", credfile)
+    
     if not os.path.exists(credfile):
         raise ValueError("Invalid credential file: {}".format(credfile))
 
