@@ -1,7 +1,7 @@
 Jinja2==2.10
-requests==2.20.1
-Click==7.0
-setuptools==40.6.3
+requests
+Click
+
 google_api_python_client==1.7.7
-httplib2==0.12.0
+httplib2
 oauth2client
